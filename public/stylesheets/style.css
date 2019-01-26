@@ -49,3 +49,8 @@ input{
   padding: 10px 20px;;
   box-sizing: border-box;
 }
+.des-title{
+  text-align: left;
+  padding-left: 200px;
+  box-sizing: border-box;
+}

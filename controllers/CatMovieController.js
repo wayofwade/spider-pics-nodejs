@@ -5,24 +5,21 @@
  * Created by chencc on 2018/12/12.
  */
 const superagent = require('superagent') // 轻量级的ajax API
-// const http = require('http');
 const cheerio = require('cheerio');
 const request = require('request')
 const url = require('url');
 const fs = require('fs');
 const async = require('async');
 const path = require('path')
-let allUrl = [];
-let curCount = 0;
-let picObjList = []
 const downLoadUrl = '/Users/chencc/catMovieDownload/' // 基本的路径
-const catMovieUrl = 'https://maoyan.com/films?showType=1&catId='
+const catMovieUrl = 'https://maoyan.com/films?showType=3&catId=' // showType=3经典影片，2-即将上映 1-正在热播。。catId=影片类型
+const urlFileName = '/Users/chencc/catMovieDownload/catMovie.json' // url下载路径文件
 
 module.exports = {
   test: function () {
     return "hello world async await";
   },
-  downloadUrl: function (Url, paths, picName) { // 下载文件的
+  downloadUrl: function (Url, paths, picName) { // 下载文件的方法
     let writeStream = fs.createWriteStream(picName);
     let readStream = request(Url) // 请求url获取图片
     readStream.pipe(writeStream); // 把图片传到本地
@@ -38,15 +35,15 @@ module.exports = {
     })
   },
   getCatMovie:function () {
+    let catMovieUrls = '' // showType=地区，catId=类型
+    for (let j = 1; j < 10; j++) {
+      catMovieUrls = catMovieUrl + j
+      this.requestCatMovie(catMovieUrls)
+    }
+  },
+  requestCatMovie: function(catMovieUrls) { // 请求url并把找出图片url以及图片对应的title
     let that = this
-    let cardId = '2'
-    let catMovieUrls = catMovieUrl + cardId // showType=地区，catId=类型
-    let num =1
     superagent.get(catMovieUrls).end(function (err, res) {
-      if (num > 1) {
-        return
-      }
-      num = num + 1
       if (err) {
         return console.error(err);
       }
@@ -87,12 +84,12 @@ module.exports = {
       fs.exists("/Users/chencc/catMovieDownload", function(exists) {
         if (!exists) {
           console.log('没有的')
-          fs.createWriteStream('/Users/chencc/catMovieDownload/result1.json')
+          fs.createWriteStream(urlFileName)
         }
         console.log('有的')
         picList.forEach((v, k) => {
           //通过fs模块把数据写入本地json
-          fs.appendFile('/Users/chencc/catMovieDownload/result1.json', JSON.stringify(v) ,'utf-8', function (err) {
+          fs.appendFile(urlFileName, JSON.stringify(v) ,'utf-8', function (err) {
             if(err) throw new Error("appendFile failed...");
           });
         })
