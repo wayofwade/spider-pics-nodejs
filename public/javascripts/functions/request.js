@@ -9,9 +9,11 @@ document.getElementById('loginBtn').click=function(){
   console.log('22222')
 }
 
-function goEgg () {
+function goEgg () { // 煎蛋网
   console.log('http://jandan.net/pic')
+  console.log('http://jandan.net/pic/page-311#comments')
   console.log('请求煎蛋的网站')
+  getUrl('/spider/cookEgg?starName='+ 'aaa')
 }
 
 function goHupu() { // 进来了
