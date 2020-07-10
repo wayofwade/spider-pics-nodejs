@@ -25,7 +25,8 @@ function goCatMovie() { // 猫眼电影的接口
   console.log('请求猫眼电影')
 }
 function goBbTree() {
-  console.log('请求宝宝树')
+  console.log('萤石')
+    getUrl('/spider/ezviz?starName='+ 'aaa')
 }
 
 function getUrl(url) { // 请求接口

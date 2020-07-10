@@ -1,5 +1,5 @@
 /**
- * @Description:
+ * @Description: 萤石商城爬虫
  * @params:
  * @return:
  * Created by chencc on 2018/12/12.
@@ -12,37 +12,45 @@ const fs = require('fs');
 const os = require('os');
 const async = require('async');
 const path = require('path')
-const {resolve} = require('path')
 let downLoadUrl = '/Users/chencc/catMovieDownload/' // 基本的路径-mac的
-const catMovieUrl = 'https://maoyan.com/films?showType=3&offset=' // showType=3经典影片，2-即将上映 1-正在热播。。catId=影片类型
+const catMovieUrl = 'https://www.ys7.com/search/index.html' // 萤石
 let urlFileName = '/Users/chencc/catMovieDownload/catMovie.json' // url下载路径文件
 
 
 module.exports = {
-  test: function () {
-    return "hello world async await";
-  },
-  downloadUrl: function (Url, paths, picName) { // 下载文件的方法
+
+    /**
+     * 下载文件的方法
+     * @param Url
+     * @param paths
+     * @param picName
+     */
+  downloadUrl: function (Url, paths, picName) {
     let writeStream = fs.createWriteStream(picName);
     let readStream = request(Url) // 请求url获取图片
     readStream.pipe(writeStream); // 把图片传到本地
+
+    console.log('图片Url=', Url, paths)
     readStream.on('end', function() {
-      console.log('文件下载成功');
+      //console.log('文件下载成功');
     });
     readStream.on('error', function() {
       console.log("错误信息:" + err)
     })
     writeStream.on("finish", function() {
-      console.log("文件写入成功");
+      //console.log("文件写入成功");
       writeStream.end();
     })
   },
-  getCatMovie:function () {
+    /**
+     * 入口文件
+     */
+    getEzvizData:function () {
       console.log('当前的__dirname : ' + __dirname)
     // 判断是linux还是windows环境
       if (os.type() == 'Windows_NT') {
           //windows
-          downLoadUrl = 'E:\\coder\\catMovieDownload'
+          downLoadUrl = 'E:\\coder\\catMovieDownload\\'
           urlFileName = 'E:\\coder\\catMovieDownload\\catMovie.json'
       } else if (os.type() == 'Darwin') {
           //mac
@@ -53,52 +61,47 @@ module.exports = {
       }
 
     let catMovieUrls = '' // showType=地区，catId=类型
-    for (let j = 1; j < 10; j++) {
-      catMovieUrls = catMovieUrl + j * 30
-      console.log('请求的url=', catMovieUrls)
-      this.requestCatMovie(catMovieUrls)
+    for (let j = 1; j < 3; j++) {
+      catMovieUrls = catMovieUrl + '?page=' + j + '&per-page=21'
+      this.getEzvizHtml(catMovieUrls)
     }
   },
   /**
    * 请求url并把找出图片url以及图片对应的title
    * @param catMovieUrls
    */
-  requestCatMovie: function(catMovieUrls) {
+  getEzvizHtml: function(catMovieUrls) {
     let that = this
     superagent.get(catMovieUrls).end(function (err, res) {
       if (err) {
         return console.error(err);
       }
-      let $ = cheerio.load(res.text);
-      console.log(res.text)
-
+      let $ = cheerio.load(res.text)
 
       let list = []
       let picList = []
       let titleList = []
-      for (let k = 0; k < 5; k ++) {
 
-        let picDiv = '.movies-panel .movies-list d1 dd:nth-child(' + (k + 1) + ') .movie-item a .movie-poster img'
-        let titleDiv = '.movies-panel .movies-list d1 dd:nth-child(' + (k + 1) + ') .movie-item-title a'
+      // 循环前16张图片
+      for (let k = 0; k < 15; k ++) {
+        let picDiv = '.product-list ul li:nth-child(' + (k + 1) + ') .product-figure a img'
+        let titleDiv = 'hello' + new Date().toDateString()
         let imgDivLists = $(picDiv) // 按照顺序查找节点，返回list
-        let titleDivLists = $(titleDiv) // 按照顺序查找节点，返回list
+        let titleDivLists = imgDivLists.map((item,index) => { return (String(Math.random()) + String(new Date().getTime())) })// $(titleDiv) // 按照顺序查找节点，返回list
 
-
-          // console.log('imgDivLists----', imgDivLists.length)
-          // console.log('titleDivLists----', titleDivLists.length)
         imgDivLists.each(function(k,v){
           let src = $(v).attr("src");
-          let srcs = $(v).attr("data-src");
-          list.push(src);
-          if (srcs) { // data-src没有的话就会undefined
-            picList.push(srcs);
+          if (src) {
+            picList.push(src);
           }
         })
         titleDivLists.each(function(k,v){ // 获取title
-          let title = $(v).text() // 这个方法是获取文本的
-          titleList.push(title)
+          // let title = $(v).text() // 这个方法是获取文本的
+          titleList.push(v)
         })
       }
+
+      // 判断文件夹存不存在
       fs.exists(downLoadUrl, function(exists) {
         console.log(exists ? "创建成功" : "创建失败");
         if (!exists) {
@@ -107,18 +110,15 @@ module.exports = {
             if(error){
               return false;
             }
-            console.log('创建目录成功');
           })
         }
       });
-      fs.exists(downLoadUrl, function(exists) {
+      // 判断文件存不存在
+      fs.exists(urlFileName, function(exists) {
         if (!exists) {
           console.log('没有的')
           fs.createWriteStream(urlFileName)
         }
-        console.log('有的', JSON.stringify(picList))
-        console.log('有的titleList', JSON.stringify(titleList))
-        console.log('0----list', JSON.stringify(list))
         picList.forEach((v, k) => {
           //通过fs模块把数据写入本地json
           fs.appendFile(urlFileName, JSON.stringify(v) ,'utf-8', function (err) {
@@ -126,15 +126,14 @@ module.exports = {
           });
         })
       })
-      titleList.forEach((v, k) => {
+
+        // 循环下载到本地
+        titleList.forEach((v, k) => {
         //定义一个以title为文件夹名的路径，作为以后下载图片时使用
         let picName = downLoadUrl + v + '-' + (new Date()).getTime() +'.jpg' // 时间戳命名防止重复
         fs.exists(downLoadUrl,function (exists) {
           if(!exists){
             console.log('不存在目录的时候')
-            setTimeout(function(){ //downloadPic方法下载图片
-              that.downloadUrl(picList[k], downLoadUrl, picName)
-            },400)
           }else {
             console.log('存在目录的时候')
             that.downloadUrl(picList[k], downLoadUrl, picName)

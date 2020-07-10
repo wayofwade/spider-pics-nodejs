@@ -11,11 +11,12 @@ const url = require('url');
 const fs = require('fs');
 const async = require('async');
 const path = require('path')
-const downLoadUrl = '/Users/chencc/catMovieDownload/' // 基本的路径
+const os = require('os');
+let downLoadUrl = '/Users/chencc/catMovieDownload/' // 基本的路径
 // 完整的路径==http://jandan.net/pic/page-311#comments===》》311可以修改为1-1000等
 const eggPicUrlPre = 'http://jandan.net/pic/page-' // 311#comments' 前缀
 const eggPicUrlAfter = '#comments' // 后缀
-const urlFileName = '/Users/chencc/catMovieDownload/catMovie.json' // url下载路径文件
+let urlFileName = '/Users/chencc/catMovieDownload/catMovie.json' // url下载路径文件
 
 module.exports = {
   test: function () {
@@ -41,6 +42,19 @@ module.exports = {
   * */
   getCookEgg:function () {
     let eggPicUrls = '' // showType=地区，catId=类型
+      console.log('当前的__dirname : ' + __dirname)
+      // 判断是linux还是windows环境
+      if (os.type() == 'Windows_NT') {
+          //windows
+          downLoadUrl = 'E:\\coder\\catMovieDownload'
+          urlFileName = 'E:\\coder\\catMovieDownload\\catMovie.json'
+      } else if (os.type() == 'Darwin') {
+          //mac
+      } else if (os.type() == 'Linux') {
+          //Linux
+      } else{
+          //不支持提示
+      }
     for (let j = 1; j < 10; j++) {
       eggPicUrls = eggPicUrlPre + j + eggPicUrlAfter
       this.requestCookEgg(eggPicUrls)

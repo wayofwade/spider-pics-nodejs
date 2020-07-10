@@ -3,6 +3,7 @@ const router = express.Router();
 const spiderController = require('../controllers/SpiderController.js')
 const spiderMaoyanController = require('../controllers/CatMovieController.js')
 const CookEggController = require('../controllers/CookEggController.js')
+const EZVIZController = require('../controllers/EZVIZController.js')
 
 
 /*
@@ -44,6 +45,14 @@ router.get('/good', function(req, res, next) {
      routes层调用controller层方法
      */
   res.render('index', { title: '测试',username:'德玛西亚2222' });
+});
+
+
+router.get('/ezviz', function(req, res, next) {
+  /*
+   routes层调用controller层方法
+   */
+    EZVIZController.getEzvizData();
 });
 
 module.exports = router;
